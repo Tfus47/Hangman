@@ -4,33 +4,28 @@ import java.io.IOException;
 import java.util.*;
 
 public class Main {
-
     private static final Scanner scanner = new Scanner(System.in);
     private static final List<String> words = new ArrayList<>();
-    private static String hiddenWord;
-    private static String maskWord;
     private static final int ATTEMPTS_MAX = 6;
     private static final String NEW_GAME = "1";
     private static final String EXIT_GAME = "2";
 
     public static void main(String[] args) {
-
-        getWordsFromDictionary("src/dictionary.txt");
+        getWordsFromDictionary("src/words.txt");
         System.out.println("Игра 'Висельница' ");
         while (true) {
-            hiddenWord = getHiddenWord();
-            maskWord = "_".repeat(hiddenWord.length());
             String input = checkInputForStart();
             if (input.equals(NEW_GAME)) {
-                startGame();
+                String hiddenWord = getHiddenWord();
+                startGame(hiddenWord);
             }
             if (input.equals(EXIT_GAME)) {
                 break;
             }
         }
-
     }
 
+    // много действий - разделить
     private static String checkInputForStart() {
         System.out.printf("%s.Новая игра\n%s.Выход\n ", NEW_GAME, EXIT_GAME);
         String input = scanner.nextLine().toUpperCase();
@@ -52,6 +47,7 @@ public class Main {
         }
     }
 
+    //изменить название
     private static void notSearchDictionary() {
         System.out.println("О, кажется отсутствует текстовый файл со словарем");
         System.out.print("Вставьте сюда путь к текстовому файлу: ");
@@ -61,32 +57,79 @@ public class Main {
 
     private static String getHiddenWord() {
         Random random = new Random();
-        Collections.shuffle(words, random);
-        return words.getFirst();
+        int randomIndex = random.nextInt(words.size());
+        return words.get(randomIndex);
     }
 
-    private static char checkCorrectInput() {
-        while (true) {
-            System.out.print("Введите букву : ");
-            String inputPlayer = scanner.nextLine();
+    private static String getInputPlayer() {
+        return scanner.nextLine();
+    }
 
-            if (inputPlayer.isEmpty()) {
-                System.out.println("Требуется ввести букву, а не оставлять ответ пустым!");
+    private static char getCorrectLetter() {
+        boolean check = true;
+        String input = new String();
+        while (check) {
+            System.out.print("Введите букву : ");
+            input = getInputPlayer();
+            check = checkIsEmpty(input, check);
+        }
+        return input.charAt(0);
+    }
+
+    private static char getUniqueLetter(Set<Character> inputLettersKeeper) {
+        char input = 0;
+        boolean correct = true;
+        while (correct) {
+            input = getCorrectLetter();
+            if (inputLettersKeeper.contains(input)) {
+                System.out.println("буква уже была");
             } else {
-                if (!(Character.UnicodeBlock.of(inputPlayer.charAt(0)) == Character.UnicodeBlock.CYRILLIC)) {
-                    System.out.println("В данной игре можно использовать только кириллицу!");
-                } else if (inputPlayer.length() > 1) {
-                    System.out.println("Требуется ввод только одной буквы!");
-                } else if (!Character.isUpperCase(inputPlayer.charAt(0))) {
-                    return inputPlayer.charAt(0);
-                } else {
-                    System.out.println("Только маленькие буквы");
-                }
+                correct = false;
             }
         }
+        return input;
+    }
+// скорей всего переименовать .
+    private static boolean checkIsEmpty(String inputPlayer, boolean check) {
+        if (inputPlayer.isEmpty()) {
+            System.out.println("Требуется ввести букву, а не оставлять ответ пустым!");
+            check = true;
+        } else {
+            check = checkCyrillic(check, inputPlayer);
+        }
+        return check;
     }
 
-    private static void checkInputAndRandomWord(char input) {
+    private static boolean checkCyrillic(boolean correctinput, String inputPlayer) {
+        if (!(Character.UnicodeBlock.of(inputPlayer.charAt(0)) == Character.UnicodeBlock.CYRILLIC)) {
+            System.out.println("В данной игре можно использовать только кириллицу!");
+        } else {
+            correctinput = checkLengthInput(correctinput, inputPlayer);
+        }
+
+        return correctinput;
+    }
+
+    private static boolean checkLengthInput(boolean check, String inputPlayer) {
+        if (inputPlayer.length() > 1) {
+            System.out.println("Требуется ввод только одной буквы!");
+        } else {
+            check = checkUpperCase(check, inputPlayer);
+        }
+        return check;
+    }
+
+    private static boolean checkUpperCase(boolean chek, String inputPlayer) {
+        if (Character.isUpperCase(inputPlayer.charAt(0))) {
+            System.out.println("Только маленькие буквы");
+        } else {
+            chek = false;
+        }
+        return chek;
+    }
+
+    //переименовать
+    private static String getModiferMask(char input, String hiddenWord, String maskWord) {
         char[] maskWordCharArray = maskWord.toCharArray();
         for (int indexWord = 0; indexWord < hiddenWord.length(); indexWord++) {
             if (hiddenWord.charAt(indexWord) == input) {
@@ -94,42 +137,63 @@ public class Main {
             }
         }
         maskWord = new String(maskWordCharArray);
+        return maskWord;
     }
 
-    private static void startGame() {
-        Set<Character> wordsKeeper = new LinkedHashSet<>();
+
+    private static String getMask(String hiddenWord) {
+        return "_".repeat(hiddenWord.length());
+    }
+
+    private static void startGame(String hiddenWord) {
         int attemptsCount = 0;
+        attemptsCount = gameloop(hiddenWord, attemptsCount);
+        showGameResult(attemptsCount, hiddenWord);
+    }
+// переименовать
+    private static int gameloop(String hiddenWord, int attemptsCount) {
         boolean status = true;
+        Set<Character> inputLettersKeeper = new LinkedHashSet<>();
+        String maskWord = getMask(hiddenWord);
         System.out.println(artHangman.values()[0].getArtHangman());
-
         while (status) {
-
             System.out.print("\n");
-            char input = checkCorrectInput();
-
-            if (!wordsKeeper.contains(input)) {
-                if (hiddenWord.contains(String.valueOf(input))) {
-                    checkInputAndRandomWord(input);
-                } else {
-                    attemptsCount++;
-                    System.out.println("Вы ошиблись(");
-                }
-                wordsKeeper.add(input);
-            } else {
-                System.out.println("Эта буква уже была, введите другую");
-            }
-            getStatsGame(wordsKeeper, attemptsCount);
-            if (attemptsCount == ATTEMPTS_MAX) {
-                status = false;
-            }
-            if (!maskWord.contains("_")) {
-                status = false;
-            }
+            char input = getUniqueLetter(inputLettersKeeper);
+            maskWord = conatins(hiddenWord, input, maskWord);
+            attemptsCount = setAttemptsCount(attemptsCount,hiddenWord, input);
+            inputLettersKeeper.add(input);
+            showStatsGame(inputLettersKeeper, attemptsCount, maskWord);
+            status = checkStatusGame(status, attemptsCount, maskWord);
         }
-        getResultGame(attemptsCount);
+        return attemptsCount;
+    }
+// переименовать
+    private static String conatins(String hiddenWord, char input, String maskWord) {
+        if (hiddenWord.contains(String.valueOf(input))) {
+            maskWord = getModiferMask(input, hiddenWord, maskWord);
+        }
+        return maskWord;
     }
 
-    private static void getResultGame(int attemptsCount) {
+    private static int setAttemptsCount(int attemptsCount, String hiddenWord, char input) {
+        if (!hiddenWord.contains(String.valueOf(input))) {
+            System.out.println("вы ошиблись");
+            attemptsCount++;
+        }
+        return attemptsCount;
+    }
+
+    private static boolean checkStatusGame(boolean status, int attemptsCount, String maskWord) {
+        if (attemptsCount == ATTEMPTS_MAX) {
+            status = false;
+        }
+        if (!maskWord.contains("_")) {
+            status = false;
+        }
+        return status;
+    }
+
+    private static void showGameResult(int attemptsCount, String hiddenWord) {
         if (attemptsCount != ATTEMPTS_MAX) {
             System.out.println("Поздравляю вы выиграли!");
         } else {
@@ -137,14 +201,15 @@ public class Main {
         }
     }
 
-    private static void getStatsGame(Set<Character> wordsKeeper, int attemptsCount) {
+    private static void showStatsGame(Set<Character> inputLettersKeeper, int attemptsCount, String maskWord) {
         String artHangman = Main.artHangman.values()[attemptsCount].getArtHangman();
         System.out.println(artHangman);
-        System.out.println("Использованные буквы : " + wordsKeeper);
+        System.out.println("Использованные буквы : " + inputLettersKeeper);
         System.out.printf("Число ошибок %d из %d допустимых \n", attemptsCount, ATTEMPTS_MAX);
         System.out.println("Загаданное слово : " + maskWord);
     }
 
+    //сказали излишние - сделать просто список
     private enum artHangman {
         ZERO("""
                 _________
@@ -154,7 +219,7 @@ public class Main {
                 ||
                 ||
                 ||
-                ||\\______"""), 
+                ||\\______"""),
         ONE("""
                 _________
                 ||/    | \s
@@ -163,7 +228,7 @@ public class Main {
                 ||
                 ||
                 ||
-                ||\\______"""), 
+                ||\\______"""),
         TWO("""
                 _________
                 ||/    | \s
@@ -172,7 +237,7 @@ public class Main {
                 ||
                 ||
                 ||
-                ||\\______"""), 
+                ||\\______"""),
         THREE("""
                 _________
                 ||/    | \s
@@ -182,7 +247,7 @@ public class Main {
                 ||     |
                 ||
                 ||\\______
-                """), 
+                """),
         FOUR("""
                 _________
                 ||/    | \s
@@ -191,7 +256,7 @@ public class Main {
                 ||    /|\\
                 ||     |
                 ||   \s
-                ||\\______"""), 
+                ||\\______"""),
         FIVE("""
                 _________
                 ||/    | \s
@@ -200,7 +265,7 @@ public class Main {
                 ||    /|\\
                 ||     |
                 ||    /
-                ||\\______"""), 
+                ||\\______"""),
         SIX("""
                 _________
                 ||/    | \s
