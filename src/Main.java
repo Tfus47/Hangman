@@ -35,6 +35,7 @@ public class Main {
         return input;
     }
 
+
     private static void getWordsFromDictionary(String filePath) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
@@ -43,12 +44,11 @@ public class Main {
                 Collections.addAll(words, lineWords);
             }
         } catch (IOException e) {
-            notSearchDictionary();
+            setDifferentPath();
         }
     }
 
-    //изменить название
-    private static void notSearchDictionary() {
+    private static void setDifferentPath() {
         System.out.println("О, кажется отсутствует текстовый файл со словарем");
         System.out.print("Вставьте сюда путь к текстовому файлу: ");
         String filePath = scanner.nextLine();
@@ -76,12 +76,12 @@ public class Main {
         return input.charAt(0);
     }
 
-    private static char getUniqueLetter(Set<Character> inputLettersKeeper) {
+    private static char getUniqueLetter(Set<Character> LettersKeeper) {
         char input = 0;
         boolean correct = true;
         while (correct) {
             input = getCorrectLetter();
-            if (inputLettersKeeper.contains(input)) {
+            if (LettersKeeper.contains(input)) {
                 System.out.println("буква уже была");
             } else {
                 correct = false;
@@ -89,7 +89,7 @@ public class Main {
         }
         return input;
     }
-// скорей всего переименовать .
+
     private static boolean checkIsEmpty(String inputPlayer, boolean check) {
         if (inputPlayer.isEmpty()) {
             System.out.println("Требуется ввести букву, а не оставлять ответ пустым!");
@@ -119,17 +119,16 @@ public class Main {
         return check;
     }
 
-    private static boolean checkUpperCase(boolean chek, String inputPlayer) {
+    private static boolean checkUpperCase(boolean check, String inputPlayer) {
         if (Character.isUpperCase(inputPlayer.charAt(0))) {
             System.out.println("Только маленькие буквы");
         } else {
-            chek = false;
+            check = false;
         }
-        return chek;
+        return check;
     }
 
-    //переименовать
-    private static String getModiferMask(char input, String hiddenWord, String maskWord) {
+    private static String setModifierMask(char input, String hiddenWord, String maskWord) {
         char[] maskWordCharArray = maskWord.toCharArray();
         for (int indexWord = 0; indexWord < hiddenWord.length(); indexWord++) {
             if (hiddenWord.charAt(indexWord) == input) {
@@ -140,42 +139,43 @@ public class Main {
         return maskWord;
     }
 
-
     private static String getMask(String hiddenWord) {
         return "_".repeat(hiddenWord.length());
     }
 
     private static void startGame(String hiddenWord) {
         int attemptsCount = 0;
-        attemptsCount = gameloop(hiddenWord, attemptsCount);
+        attemptsCount = gameLoop(hiddenWord, attemptsCount);
         showGameResult(attemptsCount, hiddenWord);
     }
-// переименовать
-    private static int gameloop(String hiddenWord, int attemptsCount) {
+
+    // переименовать
+    private static int gameLoop(String hiddenWord, int attemptsCount) {
+
         boolean status = true;
-        Set<Character> inputLettersKeeper = new LinkedHashSet<>();
+        Set<Character> LettersKeeper = new LinkedHashSet<>();
         String maskWord = getMask(hiddenWord);
-        System.out.println(artHangman.values()[0].getArtHangman());
+        showPictureHangman(getPictureHangman(), attemptsCount);
         while (status) {
             System.out.print("\n");
-            char input = getUniqueLetter(inputLettersKeeper);
-            maskWord = conatins(hiddenWord, input, maskWord);
-            attemptsCount = setAttemptsCount(attemptsCount,hiddenWord, input);
-            inputLettersKeeper.add(input);
-            showStatsGame(inputLettersKeeper, attemptsCount, maskWord);
+            char input = getUniqueLetter(LettersKeeper);
+            maskWord = getModifierMask(hiddenWord, input, maskWord);
+            attemptsCount = getAttemptsCount(attemptsCount, hiddenWord, input);
+            LettersKeeper.add(input);
+            showStatsGame(LettersKeeper, attemptsCount, maskWord);
             status = checkStatusGame(status, attemptsCount, maskWord);
         }
         return attemptsCount;
     }
-// переименовать
-    private static String conatins(String hiddenWord, char input, String maskWord) {
+
+    private static String getModifierMask(String hiddenWord, char input, String maskWord) {
         if (hiddenWord.contains(String.valueOf(input))) {
-            maskWord = getModiferMask(input, hiddenWord, maskWord);
+            maskWord = setModifierMask(input, hiddenWord, maskWord);
         }
         return maskWord;
     }
 
-    private static int setAttemptsCount(int attemptsCount, String hiddenWord, char input) {
+    private static int getAttemptsCount(int attemptsCount, String hiddenWord, char input) {
         if (!hiddenWord.contains(String.valueOf(input))) {
             System.out.println("вы ошиблись");
             attemptsCount++;
@@ -202,16 +202,15 @@ public class Main {
     }
 
     private static void showStatsGame(Set<Character> inputLettersKeeper, int attemptsCount, String maskWord) {
-        String artHangman = Main.artHangman.values()[attemptsCount].getArtHangman();
-        System.out.println(artHangman);
+        showPictureHangman(getPictureHangman(), attemptsCount);
         System.out.println("Использованные буквы : " + inputLettersKeeper);
         System.out.printf("Число ошибок %d из %d допустимых \n", attemptsCount, ATTEMPTS_MAX);
         System.out.println("Загаданное слово : " + maskWord);
     }
 
-    //сказали излишние - сделать просто список
-    private enum artHangman {
-        ZERO("""
+    private static List<String> getPictureHangman() {
+        List<String> pictureHangman = new ArrayList<>();
+        pictureHangman.add("""
                 _________
                 ||/     \s
                 ||
@@ -219,8 +218,8 @@ public class Main {
                 ||
                 ||
                 ||
-                ||\\______"""),
-        ONE("""
+                ||\\______""");
+        pictureHangman.add("""
                 _________
                 ||/    | \s
                 ||     |
@@ -228,8 +227,8 @@ public class Main {
                 ||
                 ||
                 ||
-                ||\\______"""),
-        TWO("""
+                ||\\______""");
+        pictureHangman.add("""
                 _________
                 ||/    | \s
                 ||     |
@@ -237,8 +236,8 @@ public class Main {
                 ||
                 ||
                 ||
-                ||\\______"""),
-        THREE("""
+                ||\\______""");
+        pictureHangman.add("""
                 _________
                 ||/    | \s
                 ||     |
@@ -247,8 +246,8 @@ public class Main {
                 ||     |
                 ||
                 ||\\______
-                """),
-        FOUR("""
+                """);
+        pictureHangman.add("""
                 _________
                 ||/    | \s
                 ||     |
@@ -256,8 +255,8 @@ public class Main {
                 ||    /|\\
                 ||     |
                 ||   \s
-                ||\\______"""),
-        FIVE("""
+                ||\\______""");
+        pictureHangman.add("""
                 _________
                 ||/    | \s
                 ||     |
@@ -265,8 +264,8 @@ public class Main {
                 ||    /|\\
                 ||     |
                 ||    /
-                ||\\______"""),
-        SIX("""
+                ||\\______""");
+        pictureHangman.add("""
                 _________
                 ||/    | \s
                 ||     |
@@ -276,17 +275,11 @@ public class Main {
                 ||    / \\
                 ||\\______""");
 
+        return pictureHangman;
+    }
 
-        private final String artHangman;
-
-        artHangman(String artHangman) {
-            this.artHangman = artHangman;
-        }
-
-        public String getArtHangman() {
-            return artHangman;
-        }
-
+    private static void showPictureHangman(List<String> pictureHangman, int attemptsCount) {
+        System.out.println(pictureHangman.get(attemptsCount));
     }
 
 }
