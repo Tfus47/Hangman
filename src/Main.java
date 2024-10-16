@@ -133,15 +133,15 @@ public class Main {
         return check;
     }
 
-    private static String setModifierMask(char input, String hiddenWord, String maskWord) {
-        char[] maskWordCharArray = maskWord.toCharArray();
+    private static String setModifierMask(char input, String hiddenWord, String mask) {
+        char[] maskWordCharArray = mask.toCharArray();
         for (int indexWord = 0; indexWord < hiddenWord.length(); indexWord++) {
             if (hiddenWord.charAt(indexWord) == input) {
                 maskWordCharArray[indexWord] = input;
             }
         }
-        maskWord = new String(maskWordCharArray);
-        return maskWord;
+        mask = new String(maskWordCharArray);
+        return mask;
     }
 
     private static String getMask(String hiddenWord) {
@@ -158,25 +158,25 @@ public class Main {
 
         boolean status = true;
         Set<Character> LettersKeeper = new LinkedHashSet<>();
-        String maskWord = getMask(hiddenWord);
+        String mask = getMask(hiddenWord);
         showPictureHangman(getPictureHangman(), attemptsCount);
         while (status) {
             System.out.print("\n");
             char input = getUniqueLetter(LettersKeeper);
-            maskWord = getModifierMask(hiddenWord, input, maskWord);
+            mask = getModifierMask(hiddenWord, input, mask);
             attemptsCount = getAttemptsCount(attemptsCount, hiddenWord, input);
             LettersKeeper.add(input);
-            showStatsGame(LettersKeeper, attemptsCount, maskWord);
-            status = checkStatusGame(status, attemptsCount, maskWord);
+            showStatsGame(LettersKeeper, attemptsCount, mask);
+            status = checkStatusGame(status, attemptsCount, mask);
         }
         return attemptsCount;
     }
 
-    private static String getModifierMask(String hiddenWord, char input, String maskWord) {
+    private static String getModifierMask(String hiddenWord, char input, String mask) {
         if (hiddenWord.contains(String.valueOf(input))) {
-            maskWord = setModifierMask(input, hiddenWord, maskWord);
+            mask = setModifierMask(input, hiddenWord, mask);
         }
-        return maskWord;
+        return mask;
     }
 
     private static int getAttemptsCount(int attemptsCount, String hiddenWord, char input) {
@@ -187,11 +187,11 @@ public class Main {
         return attemptsCount;
     }
 
-    private static boolean checkStatusGame(boolean status, int attemptsCount, String maskWord) {
+    private static boolean checkStatusGame(boolean status, int attemptsCount, String mask) {
         if (attemptsCount == ATTEMPTS_MAX) {
             status = false;
         }
-        if (!maskWord.contains("_")) {
+        if (!mask.contains("_")) {
             status = false;
         }
         return status;
@@ -205,11 +205,11 @@ public class Main {
         }
     }
 
-    private static void showStatsGame(Set<Character> inputLettersKeeper, int attemptsCount, String maskWord) {
+    private static void showStatsGame(Set<Character> inputLettersKeeper, int attemptsCount, String mask) {
         showPictureHangman(getPictureHangman(), attemptsCount);
         System.out.println("Использованные буквы : " + inputLettersKeeper);
         System.out.printf("Число ошибок %d из %d допустимых \n", attemptsCount, ATTEMPTS_MAX);
-        System.out.println("Загаданное слово : " + maskWord);
+        System.out.println("Загаданное слово : " + mask);
     }
 
     private static List<String> getPictureHangman() {
