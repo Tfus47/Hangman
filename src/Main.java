@@ -82,12 +82,12 @@ public class Main {
         return input.charAt(0);
     }
 
-    private static char getUniqueLetter(Set<Character> LettersKeeper) {
+    private static char getUniqueLetter(Set<Character> inputLettersKeeper) {
         char input = 0;
         boolean correct = true;
         while (correct) {
             input = getCorrectLetter();
-            if (LettersKeeper.contains(input)) {
+            if (inputLettersKeeper.contains(input)) {
                 System.out.println("буква уже была");
             } else {
                 correct = false;
@@ -157,16 +157,16 @@ public class Main {
     private static int getGameResult(String hiddenWord, int attemptsCount) {
 
         boolean status = true;
-        Set<Character> LettersKeeper = new LinkedHashSet<>();
+        Set<Character> inputLettersKeeper = new LinkedHashSet<>();
         String mask = getMask(hiddenWord);
         showPictureHangman(getPictureHangman(), attemptsCount);
         while (status) {
             System.out.print("\n");
-            char input = getUniqueLetter(LettersKeeper);
+            char input = getUniqueLetter(inputLettersKeeper);
             mask = getModifierMask(hiddenWord, input, mask);
             attemptsCount = getAttemptsCount(attemptsCount, hiddenWord, input);
-            LettersKeeper.add(input);
-            showStatsGame(LettersKeeper, attemptsCount, mask);
+            inputLettersKeeper.add(input);
+            showStatsGame(inputLettersKeeper, attemptsCount, mask);
             status = checkStatusGame(status, attemptsCount, mask);
         }
         return attemptsCount;
