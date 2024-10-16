@@ -99,7 +99,6 @@ public class Main {
     private static boolean checkIsEmpty(String inputPlayer, boolean check) {
         if (inputPlayer.isEmpty()) {
             System.out.println("Требуется ввести букву, а не оставлять ответ пустым!");
-            check = true;
         } else {
             check = checkCyrillic(check, inputPlayer);
         }
