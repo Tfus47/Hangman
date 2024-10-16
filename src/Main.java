@@ -14,7 +14,7 @@ public class Main {
         getWordsFromDictionary("src/words.txt");
         System.out.println("Игра 'Висельница' ");
         while (true) {
-            String input = checkInputForStart();
+            String input = menu();
             if (input.equals(NEW_GAME)) {
                 String hiddenWord = getHiddenWord();
                 startGame(hiddenWord);
@@ -25,16 +25,22 @@ public class Main {
         }
     }
 
-    // много действий - разделить
-    private static String checkInputForStart() {
-        System.out.printf("%s.Новая игра\n%s.Выход\n ", NEW_GAME, EXIT_GAME);
-        String input = scanner.nextLine().toUpperCase();
-        if (!((input.equals(NEW_GAME)) || (input.equals(EXIT_GAME)))) {
-            System.out.printf("Принимается только %s или %s \n", NEW_GAME, EXIT_GAME);
-        }
+    private static String menu (){
+        showMenu();
+        String input = getInputPlayer();
+        showInputCase(input);
         return input;
     }
 
+    private static void  showMenu(){
+        System.out.printf("%s.Новая игра\n%s.Выход\n ", NEW_GAME, EXIT_GAME);
+    }
+
+    private static void showInputCase(String input){
+        if (!((input.equals(NEW_GAME)) || (input.equals(EXIT_GAME)))) {
+            System.out.printf("Принимается только %s или %s \n", NEW_GAME, EXIT_GAME);
+        }
+    }
 
     private static void getWordsFromDictionary(String filePath) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
@@ -67,7 +73,7 @@ public class Main {
 
     private static char getCorrectLetter() {
         boolean check = true;
-        String input = new String();
+        String input = "";
         while (check) {
             System.out.print("Введите букву : ");
             input = getInputPlayer();
@@ -145,12 +151,11 @@ public class Main {
 
     private static void startGame(String hiddenWord) {
         int attemptsCount = 0;
-        attemptsCount = gameLoop(hiddenWord, attemptsCount);
+        attemptsCount = getGameResult(hiddenWord, attemptsCount);
         showGameResult(attemptsCount, hiddenWord);
     }
 
-    // переименовать
-    private static int gameLoop(String hiddenWord, int attemptsCount) {
+    private static int getGameResult(String hiddenWord, int attemptsCount) {
 
         boolean status = true;
         Set<Character> LettersKeeper = new LinkedHashSet<>();
