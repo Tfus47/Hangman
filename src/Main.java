@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.*;
 
 public class Main {
-    private static final Scanner scanner = new Scanner(System.in);
     private static final List<String> words = new ArrayList<>();
     private static final int ATTEMPTS_MAX = 6;
     private static final String NEW_GAME = "1";
@@ -57,7 +56,7 @@ public class Main {
     private static void setDifferentPath() {
         System.out.println("О, кажется отсутствует текстовый файл со словарем");
         System.out.print("Вставьте сюда путь к текстовому файлу: ");
-        String filePath = scanner.nextLine();
+        String filePath = getInputPlayer();
         getWordsFromDictionary(filePath);
     }
 
@@ -68,6 +67,7 @@ public class Main {
     }
 
     private static String getInputPlayer() {
+        Scanner scanner = new Scanner(System.in);
         return scanner.nextLine();
     }
 
@@ -171,6 +171,7 @@ public class Main {
         }
         return attemptsCount;
     }
+
 
     private static String getModifierMask(String hiddenWord, char input, String mask) {
         if (hiddenWord.contains(String.valueOf(input))) {
