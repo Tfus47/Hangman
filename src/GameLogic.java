@@ -55,12 +55,12 @@ public class GameLogic {
         }
     }
 
-    private void showStatus(int attemptsCount, String mask){
+    private void showStatus(int attemptsCount, String mask) {
         picture.showPicture(attemptsCount);
-        System.out.print("Использованные буквы : " );
+        System.out.print("Использованные буквы : ");
         lettersKeeper.showInputLettersKeeper();
         System.out.printf("Число ошибок %d из %d допустимых \n", attemptsCount, ATTEMPTS_MAX);
-        System.out.println("загаданное слово : "+ mask);
+        System.out.println("загаданное слово : " + mask);
 
     }
 
